@@ -1,5 +1,5 @@
-Introduction
-============
+potools
+=======
 
 This package contains command line tools to help manage translations.
 
