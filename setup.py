@@ -31,6 +31,6 @@ setup(name='potools',
       entry_points="""
       [console_scripts]
       podiff = potools.podiff:podiff
-      podefaults = potools.podefaults:podefaults
+      pocheck = potools.pocheck:pocheck
       """,
       )

@@ -25,3 +25,11 @@ def get_package_root():
     return curdir
         
 
+def usage(stream, func, msg=None):
+    if msg:
+        print >> stream, msg
+        print >> stream
+    program = os.path.basename(sys.argv[0])
+    print >> stream, func.__doc__ % {"program": program}
+    sys.exit(0)
+
