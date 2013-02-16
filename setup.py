@@ -23,7 +23,7 @@ setup(name='potools',
           'sh',
           'polib',
           'mr.developer',
-          'translate',
+          'translate-toolkit',
       ],
       extras_require={
           'podiff': ['polib', 'mr.developer'],
@@ -31,6 +31,6 @@ setup(name='potools',
       entry_points="""
       [console_scripts]
       podiff = potools.podiff:podiff
-      podefaults = potools.checkdefaults:podefaults
+      podefaults = potools.podefaults:podefaults
       """,
       )
