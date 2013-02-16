@@ -1,3 +1,4 @@
+import os
 from setuptools import setup, find_packages
 
 version = '0.0'
@@ -5,7 +6,8 @@ version = '0.0'
 setup(name='potools',
       version=version,
       description="Python scripts to help with managing translations",
-      long_description="""""",
+      long_description=open("README.rst").read() + "\n" +
+                       open(os.path.join("docs", "changes.rst")).read(),
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='',
       author='Wolfgang Thomas, Manuel Reinhardt, JC Brand',
