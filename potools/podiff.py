@@ -25,8 +25,8 @@ def usage(stream, msg=None):
 
 
 def podiff():
-    """ %(program)s: shows differences between the po files in the working 
-        copy of this package and their counterparts in the repository. 
+    """ %(program)s: shows differences between the po files in the current 
+        subdirectory tree  and their counterparts in a repository. 
         Only cares about msgid and msgstr, not about position in the file, 
         comments, etc.
 
