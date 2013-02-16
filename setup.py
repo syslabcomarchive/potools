@@ -20,7 +20,6 @@ setup(name='potools',
       zip_safe=False,
       install_requires=[
           'setuptools',
-          'sh',
           'polib',
           'mr.developer',
           'translate-toolkit',
@@ -32,5 +31,7 @@ setup(name='potools',
       [console_scripts]
       podiff = potools.podiff:podiff
       pocheck = potools.pocheck:pocheck
+      poupdate = potools.poupdate:poupdate
+      popopulate = potools.popopulate:popopulate
       """,
       )
