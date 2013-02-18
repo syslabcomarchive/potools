@@ -98,25 +98,25 @@ class Podiff(object):
         file1 = polib.pofile(filepath1)
         file2 = polib.pofile(filepath2)
         diff = []
+        for removed_entry in filter(
+                            lambda e: not file2.find(
+                                            e.msgid, 
+                                            include_obsolete_entries=True), 
+                            file1):
+            diff += [u'-msgid "%s"' % removed_entry.msgid]
+            diff += [u'-msgstr "%s"\n' % removed_entry.msgstr]
+
         for entry_file2 in file2:
             entry_file1 = file1.find(
                                 entry_file2.msgid,
                                 include_obsolete_entries=True)
             if not entry_file1:
-                diff += [u'-msgid "%s"' % entry_file2.msgid]
-                diff += [u'-msgstr "%s"\n' % entry_file2.msgstr]
+                diff += [u'+msgid "%s"' % entry_file2.msgid]
+                diff += [u'+msgstr "%s"\n' % entry_file2.msgstr]
             elif not entry_file2.msgstr == entry_file1.msgstr:
                 diff += [u' msgid "%s"' % entry_file2.msgid]
-                diff += [u'-msgstr "%s"' % entry_file2.msgstr]
-                diff += [u'+msgstr "%s"\n' % entry_file1.msgstr]
-
-        for entry_file1 in filter(
-                            lambda e: not file2.find(
-                                            e.msgid, 
-                                            include_obsolete_entries=True), 
-                            file1):
-            diff += [u'+msgid "%s"' % entry_file1.msgid]
-            diff += [u'+msgstr "%s"\n' % entry_file1.msgstr]
+                diff += [u'-msgstr "%s"\n' % entry_file1.msgstr]
+                diff += [u'+msgstr "%s"' % entry_file2.msgstr]
         return diff
 
     def diff(self, filepath1, filepath2):
