@@ -25,7 +25,7 @@ setup(name='potools',
           'translate-toolkit',
       ],
       extras_require={
-          'podiff': ['polib', 'mr.developer'],
+          'test': ['z3c.testsetup'],
       },
       entry_points="""
       [console_scripts]
