@@ -1,4 +1,6 @@
 # -*- coding: UTF-8 -*-
+from mr.developer.common import which
+from optparse import OptionParser
 import logging
 import os
 import polib
@@ -6,54 +8,52 @@ import re
 import subprocess
 import tempfile
 import urllib
-from mr.developer.common import which
 from potools import utils
 
+LOGLEVEL = logging.INFO
+
 logging.basicConfig(
-            level=utils.loglevel(),
+            level=LOGLEVEL,
             format="%(levelname)s: %(message)s")
 log = logging.getLogger(__name__)
 
 
-def podiff():
-    """ %(program)s: shows differences between the po files in the current 
-        subdirectory tree  and their counterparts in a repository. 
-        Only cares about msgid and msgstr, not about position in the file, 
-        comments, etc.
+def parse_options(script):
+    global LOGLEVEL
+    usage = "usage: %prog [options] FILE(S)"
+    parser = OptionParser(usage)
+    parser.add_option("-v", "--verbose",
+                        action="store_true", dest="verbose", default=False,
+                        help="Verbose mode")
+    parser.add_option("--vcs", nargs=2, dest="vcs",
+                        help=u"Compare the file to one in a version "
+                            u"control repository. Specify the version "
+                            u"control type and its URL (e.g --vcs git "
+                            u"git@github.com:syslabcom/potools.git).")
 
-        Usage:  %(program)s [--help|-h] [-v] ${VCS type} ${VCS URL}
+    (options, args) = parser.parse_args()
+    if not options.vcs and len(args) != 2:
+        parser.error(u"If you aren't using the --vcs option, then you'll \
+                        need to specify exactly two files.")
+    LOGLEVEL = options.verbose and logging.DEBUG or logging.INFO
+    return (options, args)
+
+
+def _vcsdiff(pofiles, vcstype, vcsurl):
+    """ Internal helper function. 
+    
+        Diffs a file with it's counterpart in a VCS repository, of 
+        type $vcstype at $vcsurl.
     """
-    options = utils.parse_options(__name__)
-    if options.vcs:
-        vcstype = options.vcs[0]
-        vcsurl = options.vcs[1]
-
-    pofiles = []
-    def visit(pofiles, dirname, names):
-        pofiles.extend(
-            map(lambda n: os.path.join(dirname, n),
-                filter(
-                    lambda n: n.endswith('.po') or n.endswith('.pot'), names)))
-
-    if options.file:
-        file = options.file
-        pofiles = [file]
-        dir = '/'.join(options.file.split('/')[:-1])
-        os.chdir(dir)
-        basepath = utils.get_package_root(os.getcwd())
-    else:
-        if options.dir:
-            os.chdir(options.dir)
-        cwd = os.getcwd()
-        os.path.walk(cwd, visit, pofiles)
-        basepath = utils.get_package_root(cwd)
+    dir = '/'.join(pofiles[0].split('/')[:-1])
+    os.chdir(dir)
+    basepath = utils.get_package_root(os.getcwd())
 
     for pofile in pofiles:
         proto, string = urllib.splittype(vcsurl)
         host, path = urllib.splithost(string)
         relpath = os.path.relpath(pofile, basepath)
         pofileurl = os.path.join(vcsurl, relpath)
-
         tmp, tmppath = tempfile.mkstemp(text=True)
         if vcstype == 'svn':
             urllib.urlretrieve(pofileurl, tmppath)
@@ -80,41 +80,65 @@ def podiff():
         else:
             log.critical('Sorry, %s is not supported yet.')
             return
-
         log.debug("Comparing %s and %s:%s" % (pofile, branch, relpath))
-        polocal = polib.pofile(pofile)
-        povcs = polib.pofile(tmppath)
-
-        diff = []
-        for entryvcs in povcs:
-            entrylocal = polocal.find(
-                                entryvcs.msgid,
-                                include_obsolete_entries=True)
-            if not entrylocal:
-                diff += [u'-msgid "%s"' % entryvcs.msgid]
-                diff += [u'-msgstr "%s"\n' % entryvcs.msgstr]
-            elif not entryvcs.msgstr == entrylocal.msgstr:
-                diff += [u' msgid "%s"' % entryvcs.msgid]
-                diff += [u'-msgstr "%s"' % entryvcs.msgstr]
-                diff += [u'+msgstr "%s"\n' % entrylocal.msgstr]
-
-        for entrylocal in filter(
-                            lambda e: not povcs.find(
-                                            e.msgid, 
-                                            include_obsolete_entries=True), 
-                            polocal):
-            diff += [u'+msgid "%s"' % entrylocal.msgid]
-            diff += [u'+msgstr "%s"\n' % entrylocal.msgstr]
-
-        if diff:
-            out = [u'']
-            po_path = u'Index: %s' % pofile
-            out += [po_path]
-            out += ['='*len(po_path)]
-            out += [u'--- repository']
-            out += [u'+++ working copy']
-            out += diff
-            out += ['']
-            print("\n".join([o.encode('utf-8') for o in out]))
-
+        _diff(pofile, tmppath)
         os.remove(tmppath)
+
+
+def _diff(filepath1, filepath2):
+    """ Internal helper function
+
+        Diffs two po files. Only cares about msgid and msgstr, not about 
+        position in the file, comments etc.
+    """
+    file1 = polib.pofile(filepath1)
+    file2 = polib.pofile(filepath2)
+    diff = []
+    for entry_file2 in file2:
+        entry_file1 = file1.find(
+                            entry_file2.msgid,
+                            include_obsolete_entries=True)
+        if not entry_file1:
+            diff += [u'-msgid "%s"' % entry_file2.msgid]
+            diff += [u'-msgstr "%s"\n' % entry_file2.msgstr]
+        elif not entry_file2.msgstr == entry_file1.msgstr:
+            diff += [u' msgid "%s"' % entry_file2.msgid]
+            diff += [u'-msgstr "%s"' % entry_file2.msgstr]
+            diff += [u'+msgstr "%s"\n' % entry_file1.msgstr]
+
+    for entry_file1 in filter(
+                        lambda e: not file2.find(
+                                        e.msgid, 
+                                        include_obsolete_entries=True), 
+                        file1):
+        diff += [u'+msgid "%s"' % entry_file1.msgid]
+        diff += [u'+msgstr "%s"\n' % entry_file1.msgstr]
+
+    if diff:
+        out = [u'']
+        po_path = u'Index: %s' % filepath1 
+        out += [po_path]
+        out += ['='*len(po_path)]
+        out += [u'--- repository']
+        out += [u'+++ working copy']
+        out += diff
+        out += ['']
+        print("\n".join([o.encode('utf-8') for o in out]))
+
+    
+def podiff():
+    """ Shows the difference between two po files. Only cares about msgid and
+        msgstr, not about position in the file, comments etc.
+    """
+    (options, args) = parse_options(__name__)
+    pofiles = []
+    def visit(pofiles, dirname, names):
+        pofiles.extend(
+            map(lambda n: os.path.join(dirname, n),
+                filter(
+                    lambda n: n.endswith('.po') or n.endswith('.pot'), names)))
+
+    if not options.vcs:
+        _diff(args[0], args[1])
+    else:
+        _vcsdiff(args, options.vcs[0], options.vcs[1])
