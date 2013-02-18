@@ -29,7 +29,7 @@ setup(name='potools',
       },
       entry_points="""
       [console_scripts]
-      podiff = potools.podiff:podiff
+      podiff = potools.podiff:main
       pocheck = potools.pocheck:pocheck
       poupdate = potools.poupdate:poupdate
       popopulate = potools.popopulate:popopulate
