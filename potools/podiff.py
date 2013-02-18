@@ -4,7 +4,6 @@ import os
 import polib
 import re
 import subprocess
-import sys
 import tempfile
 import urllib
 from mr.developer.common import which
@@ -15,14 +14,6 @@ logging.basicConfig(
             format="%(levelname)s: %(message)s")
 log = logging.getLogger(__name__)
 
-def usage(stream, msg=None):
-    if msg:
-        print >> stream, msg
-        print >> stream
-    program = os.path.basename(sys.argv[0])
-    print >> stream, podiff.__doc__ % {"program": program}
-    sys.exit(0)
-
 
 def podiff():
     """ %(program)s: shows differences between the po files in the current 
@@ -32,14 +23,11 @@ def podiff():
 
         Usage:  %(program)s [--help|-h] [-v] ${VCS type} ${VCS URL}
     """
-    if '--help' in sys.argv or '-h' in sys.argv:
-        usage(sys.stdout)
+    options = utils.parse_options(__name__)
+    if options.vcs:
+        vcstype = options.vcs[0]
+        vcsurl = options.vcs[1]
 
-    if len(sys.argv) < 2:
-        usage(sys.stderr, "\nERROR: Not enough arguments")
-
-    vcstype = sys.argv[1]
-    vcsurl = sys.argv[2]
     pofiles = []
     def visit(pofiles, dirname, names):
         pofiles.extend(
@@ -47,8 +35,18 @@ def podiff():
                 filter(
                     lambda n: n.endswith('.po') or n.endswith('.pot'), names)))
 
-    os.path.walk(os.getcwd(), visit, pofiles)
-    basepath = utils.get_package_root()
+    if options.file:
+        file = options.file
+        pofiles = [file]
+        dir = '/'.join(options.file.split('/')[:-1])
+        os.chdir(dir)
+        basepath = utils.get_package_root(os.getcwd())
+    else:
+        if options.dir:
+            os.chdir(options.dir)
+        cwd = os.getcwd()
+        os.path.walk(cwd, visit, pofiles)
+        basepath = utils.get_package_root(cwd)
 
     for pofile in pofiles:
         proto, string = urllib.splittype(vcsurl)
