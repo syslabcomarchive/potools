@@ -1,48 +1,33 @@
+import logging
 import sys
-import os
-import re
 import polib
-
+from optparse import OptionParser
 from potools.utils import get_default
 from potools.utils import append_entry
 
-def popopulate():
-    """%(program)s: For every untranslated or fuzzy entry, 
-        copy its "Default" string for its value. If no default value exists, copy its
+log = logging.getLogger(__name__)
+
+def parse_options(self):
+    usage = "%prog [options] FILE"
+    parser = OptionParser(usage)
+    parser.add_option("-v", "--verbose",
+                        action="store_true", dest="verbose", default=False,
+                        help="Verbose mode")
+    (options, args) = parser.parse_args()
+    return (options, args)
+
+
+def PoPopulate():
+    """ For every untranslated or fuzzy entry, copy its "Default" 
+        string for its msgstr value. If no default value exists, copy its 
         msgid.
-
-        usage:                  %(program)s file.po
-        file.po                 The po file
-        outfile.po              The po file to be written to
     """
+    def __init__(self, options={}, args=()):
+        self.options = options
+        self.args = args
 
-
-
-    patt = re.compile("""Default:.?["\' ](.*?)(["\']$|$)""", re.S)
-
-
-    def usage(stream, msg=None):
-        if msg:
-            print >> stream, msg
-            print >> stream
-        program = os.path.basename(sys.argv[0])
-        print >> stream, __doc__ % {"program": program}
-        sys.exit(0)
-
-
-    def main():
-        if len(sys.argv) < 3:
-            usage(sys.stderr, "\nERROR: Not enough arguments")
-        elif len(sys.argv) > 3:
-            usage(sys.stderr, "\nERROR: Too many arguments")
-
-        file = sys.argv[1]
-        if not os.path.isfile(file):
-            usage(sys.stderr, "\nERROR: path to 'old' file is not valid")
-
-        outfile = sys.argv[2]
-
-        pofile = polib.pofile(file)
+    def run(self):
+        pofile = polib.pofile(self.args[1])
         outpo = polib.POFile()
 
         # Copy header and metadata
@@ -50,21 +35,25 @@ def popopulate():
         [outpo.metadata.update({key: val}) for (key, val) in pofile.metadata.items()]
 
         entries = pofile.untranslated_entries() + pofile.fuzzy_entries()
-
         for entry in entries:
             default = get_default(entry)
             outpo = append_entry(outpo, entry, default)
 
-        outpo.save(outfile)
-        print "--------------------------------------------------------"
-        print "SOME STATS TO HELP WITH DOUBLE-CHECKING:"
-        print "Untranslated entries in old.po: %d" % len(pofile.untranslated_entries())
-        print "Fuzzy entries in old.po: %d" % len(pofile.fuzzy_entries())
-        print "Found %d entries that need to be updated" % len(outpo)
-        print "--------------------------------------------------------"
+        print outpo
+        log.debug("--------------------------------------------------------")
+        log.debug("SOME STATS TO HELP WITH DOUBLE-CHECKING:")
+        log.debug("Untranslated entries in old.po: %d" % len(pofile.untranslated_entries()))
+        log.debug("Fuzzy entries in old.po: %d" % len(pofile.fuzzy_entries()))
+        log.debug("Found %d entries that need to be updated" % len(outpo))
+        log.debug("--------------------------------------------------------")
+        sys.exit(0)
 
-        sys.exit('Finished sucessfully')
 
-    if __name__ == "__main__":
-        main()
+def main():
+    options, args = parse_options()
+    logging.basicConfig(
+            level=options.verbose and logging.DEBUG or logging.INFO,
+            format="%(levelname)s: %(message)s")
+    popopulate = PoPopulate(options, args)
+    popopulate.run()
 

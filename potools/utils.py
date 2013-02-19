@@ -1,7 +1,6 @@
 import polib
 import re
 
-
 def get_default(entry):
     """ Extract the default translation from the entry (without "Default:")
     """

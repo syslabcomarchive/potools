@@ -10,8 +10,6 @@ import tempfile
 import urllib
 from potools import utils
 
-LOGLEVEL = logging.INFO
-
 log = logging.getLogger(__name__)
 
 def parse_options(self):
