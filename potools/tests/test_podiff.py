@@ -22,7 +22,7 @@ class TestPodiff(unittest.TestCase):
         diff = self.podiff._diff(self.pf, self.tmppath)
         self.assertEquals(len(diff), 0)
 
-    def test_comment_added(self):
+    def test_comment_edited(self):
         """ If the only change is in the comments, the diff should be
             empty.
 
