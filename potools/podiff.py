@@ -43,52 +43,61 @@ class Podiff(object):
         if not self.options.vcs:
             self.diff(self.args[0], self.args[1])
         else:
-            self.vcsdiff(self.args, self.options.vcs[0], self.options.vcs[1])
+            self.vcsdiff(self.args[0], self.options.vcs[0], self.options.vcs[1])
 
-    def vcsdiff(self, pofiles, vcstype, vcsurl):
+
+    def get_package_root(self, dir):
+        while 'setup.py' not in os.listdir(dir):
+            newdir = os.path.dirname(dir)
+            if newdir == dir:
+                log.critical("Couldn't find python package root.")
+                return 
+            dir = newdir
+        return dir
+
+    def vcsdiff(self, pofile, vcstype, vcsurl):
         """ Internal helper function. 
         
             Diffs a file with it's counterpart in a VCS repository, of 
             type $vcstype at $vcsurl.
         """
-        dir = '/'.join(pofiles[0].split('/')[:-1])
-        os.chdir(dir)
-        basepath = utils.get_package_root(os.getcwd())
+        pofile = os.path.abspath(pofile)
+        basepath = self.get_package_root(os.getcwd())
 
-        for pofile in pofiles:
-            proto, string = urllib.splittype(vcsurl)
-            host, path = urllib.splithost(string)
-            relpath = os.path.relpath(pofile, basepath)
-            pofileurl = os.path.join(vcsurl, relpath)
-            tmp, tmppath = tempfile.mkstemp(text=True)
-            if vcstype == 'svn':
-                urllib.urlretrieve(pofileurl, tmppath)
-            elif vcstype == 'git':
-                cmd = which('git')
-                branchmatch = re.search('branch=(\S*)', vcsurl)
-                if branchmatch:
-                    branch = branchmatch.group(1)
-                else:
-                    branch = 'master'
-                cmdline = '%s show %s:%s' % (cmd, branch, relpath)
-                err, errtmppath = tempfile.mkstemp(text=True)
-                out = subprocess.Popen(cmdline.split(' '), 
-                        stdout=subprocess.PIPE,
-                        stderr=err,
-                        cwd=basepath).stdout.read()
-                err = open(errtmppath).read()
-                if err:
-                    log.critical(err)
-                    return
-                outfile = open(tmppath, 'w')
-                outfile.write(out)
-                outfile.close()
+        proto, string = urllib.splittype(vcsurl)
+        host, path = urllib.splithost(string)
+
+        relpath = os.path.relpath(pofile, basepath)
+        pofileurl = os.path.join(vcsurl, relpath)
+        tmp, tmppath = tempfile.mkstemp(text=True)
+        if vcstype == 'svn':
+            urllib.urlretrieve(pofileurl, tmppath)
+        elif vcstype == 'git':
+            cmd = which('git')
+            branchmatch = re.search('branch=(\S*)', vcsurl)
+            if branchmatch:
+                branch = branchmatch.group(1)
             else:
-                log.critical('Sorry, %s is not supported yet.')
+                branch = 'master'
+            cmdline = '%s show %s:%s' % (cmd, branch, relpath)
+            err, errtmppath = tempfile.mkstemp(text=True)
+            out = subprocess.Popen(cmdline.split(' '), 
+                    stdout=subprocess.PIPE,
+                    stderr=err,
+                    cwd=basepath).stdout.read()
+            err = open(errtmppath).read()
+            if err:
+                log.critical(err)
                 return
-            log.debug("Comparing %s and %s:%s" % (pofile, branch, relpath))
-            self.diff(pofile, tmppath)
-            os.remove(tmppath)
+            outfile = open(tmppath, 'w')
+            outfile.write(out)
+            outfile.close()
+        else:
+            log.critical('Sorry, %s is not supported yet.')
+            return
+        log.debug("Comparing %s and %s:%s" % (pofile, branch, relpath))
+        self.diff(pofile, tmppath)
+        os.remove(tmppath)
 
     def _diff(self, filepath1, filepath2):
         """ Internal helper function
