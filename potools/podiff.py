@@ -12,7 +12,7 @@ from potools import utils
 
 log = logging.getLogger(__name__)
 
-def parse_options(self):
+def parse_options():
     usage = """\n%prog [options] FILE1 FILE2\n%prog --vcs $vcstype $vcsurl [options] FILE"""
     parser = OptionParser(usage)
     parser.add_option("-v", "--verbose",
