@@ -96,7 +96,7 @@ class Podiff(object):
             log.critical('Sorry, %s is not supported yet.')
             return
         log.debug("Comparing %s and %s:%s" % (pofile, branch, relpath))
-        self.diff(pofile, tmppath)
+        self.diff(tmppath, pofile)
         os.remove(tmppath)
 
     def _diff(self, filepath1, filepath2):
@@ -122,7 +122,7 @@ class Podiff(object):
                 diff += [u'+msgstr "%s"\n' % entry_file2.msgstr]
             elif not entry_file2.msgstr == entry_file1.msgstr:
                 diff += [u' msgid "%s"' % entry_file2.msgid]
-                diff += [u'-msgstr "%s"\n' % entry_file1.msgstr]
+                diff += [u'-msgstr "%s"' % entry_file1.msgstr]
                 diff += [u'+msgstr "%s"' % entry_file2.msgstr]
         return diff
 
@@ -130,7 +130,7 @@ class Podiff(object):
         """ Diffs two po files. Only cares about msgid and msgstr, not about 
             position in the file, comments etc.
         """
-        po_path = u'\nIndex: %s' % filepath1 
+        po_path = u'\nIndex: %s' % filepath2 
         diff = ['\n'+po_path+'\n'+'='*len(po_path)+'\n--- repository\n+++ working copy']
         diff += self._diff(filepath1, filepath2)
         diff = "\n".join([o.encode('utf-8') for o in diff])
