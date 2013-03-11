@@ -33,23 +33,30 @@ class PoCheck(object):
 
     def run(self):
         """ """
+        out = '\n'
         if self.options.defaults:
-            out = self.check_duplicate_defaults()
-            print out
-            sys.exit(0)
+            entries = self.check_duplicate_defaults(self.args[0])
+            if entries:
+                msg = "Duplicate defaults found for the following msgids:\n"
+                out += msg
+                out += "-"*(len(msg)-1)+'\n'
+                for entry in entries:
+                    out += '%s\n' % entry.msgid
+        print out
+        sys.exit(0)
 
-    def check_duplicate_defaults(self):
+    def _get_duplicate_defaults(self, filename):
         patt = re.compile("""Default:.?["\' ](.*?)(["\']$|$)""", re.S)
-        po = polib.pofile(self.args[0])
+        po = polib.pofile(filename)
         counter = 0
-        out = ''
+        entries = []
         for entry in po:
             counter += 1
             match = patt.match(entry.comment)
             if match:
                 if "Default:" in match.group(1).replace('\n', ' '):
-                    out += 'Duplicate for msgid "%s"\n' % entry.msgid
-        return out
+                    entries.append(entry)
+        return entries
 
 
 def main():

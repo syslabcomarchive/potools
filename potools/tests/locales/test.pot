@@ -1948,7 +1948,10 @@ msgid "priority_high"
 msgstr ""
 
 #. Default: Please leave any comments you may have on the question above in
+#. this field
+#. Default: Please leave any comments you may have on the question above in
 #. this field. These comments will be used in the action plan.
+#: src/osha/oira/client/templates/risk_actionplan.pt:217
 #: src/osha/oira/client/templates/risk_evaluation.pt:124
 #: src/osha/oira/client/templates/risk_identification.pt:41
 msgid "label_comment"
