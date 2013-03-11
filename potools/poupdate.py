@@ -1,8 +1,8 @@
 import sys
 import os
-import re
 import polib
 from ptools import utils
+
 
 def poupdate():
     """%(program)s: For an existing po file ORIG and a second po file UPDATE that
@@ -15,8 +15,6 @@ def poupdate():
         orig.po   A po file that should be updated with new translations
         update.po The po file that contains new translations to go into orig.po
     """
-    patt = re.compile("""Default:.?["\' ](.*?)(["\']$|$)""", re.S)
-
     if len(sys.argv) < 3:
         utils.usage(sys.stderr, poupdate, "\nERROR: Not enough arguments")
     origfile = sys.argv[1]
