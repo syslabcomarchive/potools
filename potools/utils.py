@@ -1,6 +1,7 @@
 import polib
 import re
 
+
 def get_default(entry):
     """ Extract the default translation from the entry (without "Default:")
     """
@@ -25,15 +26,16 @@ def append_entry(pofile, entry, default_msgstr=None):
     """ """
     if default_msgstr is None:
         entry = polib.POEntry(
-                        msgid=entry.msgid,
-                        occurrences=entry.occurrences,
-                        comment=entry.comment)
+            msgid=entry.msgid,
+            occurrences=entry.occurrences,
+            comment=entry.comment
+        )
     else:
         entry = polib.POEntry(
-                        msgid=entry.msgid,
-                        msgstr=default_msgstr.strip(),
-                        occurrences=entry.occurrences,
-                        comment=entry.comment)
+            msgid=entry.msgid,
+            msgstr=default_msgstr.strip(),
+            occurrences=entry.occurrences,
+            comment=entry.comment
+        )
     pofile.append(entry)
     return pofile
-
