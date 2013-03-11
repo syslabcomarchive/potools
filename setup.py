@@ -1,7 +1,7 @@
 import os
 from setuptools import setup, find_packages
 
-version = '0.0'
+version = '0.1'
 
 setup(name='potools',
       version=version,
@@ -31,5 +31,6 @@ setup(name='potools',
       [console_scripts]
       podiff = potools.podiff:main
       pogetnew = potools.poget:main
+      pocheck = potools.pocheck:main
       """,
       )
