@@ -34,4 +34,4 @@ podiff
 
 * Diff all po files in a git repository, with the last committed versions::
 
-    find -name "*.po" -exec ~/dev/potools/bin/podiff --vcs git $(git remote -v | awk 'BEGIN {} NR ==2 {print substr ($2, 1)}') {} \; 
+    find -name "*.po" -exec podiff --vcs git $(git remote -v | awk 'BEGIN {} NR ==2 {print substr ($2, 1)}') {} \; 
