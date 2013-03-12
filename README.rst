@@ -25,3 +25,13 @@ Buildout users can add the following part to their buildouts::
     [script]
     recipe = zc.recipe.egg
     eggs = potools 
+
+One-liners
+==========
+
+podiff
+------
+
+* Diff all po files in a git repository, with the last committed versions::
+
+    find -name "*.po" -exec ~/dev/potools/bin/podiff --vcs git $(git remote -v | awk 'BEGIN {} NR ==2 {print substr ($2, 1)}') {} \; 
