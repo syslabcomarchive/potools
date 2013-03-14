@@ -8,6 +8,7 @@ This package contains command line tools to help manage translations.
 * *pogetnew*: Compares two po files and return all new entries that need to be translated. Output is printed to stdout, in the format as a valid po file, so that it can be sent to translator.
 
 * *pocheck*: Checks the pot/po file for smells. 
+    * The `Translate Toolkit`_ provides a similar tool called `pofilter`_. Pocheck aims to not duplicate any of the functionality already in *pofilter*.
 
 Installation
 ============
@@ -35,3 +36,6 @@ podiff
 * Diff all po files in a git repository, with the last committed versions::
 
     find -name "*.po" -exec podiff --vcs git $(git remote -v | awk 'BEGIN {} NR ==2 {print substr ($2, 1)}') {} \; 
+
+.. _`Translate Toolkit`: http://translate.sourceforge.net/wiki/toolkit
+.. _`pofilter`: http://translate.sourceforge.net/wiki/toolkit/pofilter
