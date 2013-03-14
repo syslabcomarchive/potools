@@ -37,5 +37,5 @@ podiff
 
     find -name "*.po" -exec podiff --vcs git $(git remote -v | awk 'BEGIN {} NR ==2 {print substr ($2, 1)}') {} \; 
 
-.. _`Translate Toolkit`: http://translate.sourceforge.net/wiki/toolkit
+.. _`Translate Toolkit`: http://docs.translatehouse.org/projects/translate-toolkit/en/latest/
 .. _`pofilter`: http://translate.sourceforge.net/wiki/toolkit/pofilter
