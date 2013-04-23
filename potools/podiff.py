@@ -120,19 +120,42 @@ class Podiff(object):
             if not entry_file1:
                 diff += [u'+msgid "%s"' % entry_file2.msgid]
                 diff += [u'+msgstr "%s"\n' % entry_file2.msgstr]
-            elif not entry_file2.msgstr == entry_file1.msgstr:
-                diff += [u' msgid "%s"' % entry_file2.msgid]
-                diff += [u'-msgstr "%s"' % entry_file1.msgstr]
-                diff += [u'+msgstr "%s"' % entry_file2.msgstr]
+            else:
+                changed = {}
+                changed['comment'] = entry_file2.comment != entry_file1.comment
+                changed['msgstr'] = entry_file2.msgstr != entry_file1.msgstr
+                if not changed['comment'] and not changed['msgstr']:
+                    continue
+
+                if changed['comment']:
+                    diff += [u'-#. "%s"' % line
+                             for line in entry_file1.comment.split('\n')]
+                    diff += [u'+#. "%s"' % line
+                             for line in entry_file2.comment.split('\n')]
+                else:
+                    diff += [u'#. "%s"' % line
+                             for line in entry_file2.comment.split('\n')]
+
+                diff += [u'msgid "%s"' % line
+                         for line in entry_file2.msgid.split('\n')]
+
+                if changed['msgstr']:
+                    diff += [u'-msgstr "%s"' % line
+                             for line in entry_file1.msgstr.split('\n')]
+                    diff += [u'+msgstr "%s"' % line
+                             for line in entry_file2.msgstr.split('\n')]
+                else:
+                    diff += [u'msgstr "%s"' % line
+                             for line in entry_file2.msgstr.split('\n')]
         return diff
 
     def diff(self, filepath1, filepath2):
         """ Diffs two po files. Only cares about msgid and msgstr, not about
             position in the file, comments etc.
         """
-        po_path = u'\nIndex: %s' % filepath2
+        po_path = u'Index: %s' % filepath2
         diff = ['\n'+po_path+'\n'+'='*len(po_path) +
-                '\n--- repository\n+++ working copy']
+                '\n--- repository\n+++ working copy\n']
         diff += self._diff(filepath1, filepath2)
         diff = "\n".join([o.encode('utf-8') for o in diff])
         print(diff)

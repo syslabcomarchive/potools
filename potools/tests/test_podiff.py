@@ -34,7 +34,11 @@ class TestPodiff(unittest.TestCase):
         po[0].comment = po[0].comment+' edited'
         po.save()
         diff = self.podiff._diff(self.pf, self.tmppath)
-        self.assertEquals(len(diff), 0)
+        self.assertEquals(len(diff), 4)
+        self.assertEquals(diff[0].strip(), u'-#. "Default: Foo"')
+        self.assertEquals(diff[1].strip(), u'+#. "Default: Foo edited"')
+        self.assertEquals(diff[2].strip(), u'msgid "label_foo"')
+        self.assertEquals(diff[3].strip(), u'msgstr "Foo"')
 
     def test_order_changed(self):
         """ If the only change is the order of the entries, the diff should be
@@ -54,19 +58,21 @@ class TestPodiff(unittest.TestCase):
         po[0].msgstr = po[0].msgstr + ' edited'
         po.save()
         diff = self.podiff._diff(self.pf, self.tmppath)
-        self.assertEquals(len(diff), 3)
-        self.assertEquals(diff[0].strip(), u'msgid "label_foo"')
-        self.assertEquals(diff[1].strip(), u'-msgstr "Foo"')
-        self.assertEquals(diff[2].strip(), u'+msgstr "Foo edited"')
+        self.assertEquals(len(diff), 4)
+        self.assertEquals(diff[0].strip(), u'#. "Default: Foo"')
+        self.assertEquals(diff[1].strip(), u'msgid "label_foo"')
+        self.assertEquals(diff[2].strip(), u'-msgstr "Foo"')
+        self.assertEquals(diff[3].strip(), u'+msgstr "Foo edited"')
 
         # Edit the last entry's msgstr
         po[-1].msgstr = po[-1].msgstr + ' edited'
         po.save()
         diff = self.podiff._diff(self.pf, self.tmppath)
-        self.assertEquals(len(diff), 6)
-        self.assertEquals(diff[3].strip(), u'msgid "Hello World"')
-        self.assertEquals(diff[4].strip(), u'-msgstr "Hello World"')
-        self.assertEquals(diff[5].strip(), u'+msgstr "Hello World edited"')
+        self.assertEquals(len(diff), 8)
+        self.assertEquals(diff[4].strip(), u'#. "Default: Bar"')
+        self.assertEquals(diff[5].strip(), u'msgid "Hello World"')
+        self.assertEquals(diff[6].strip(), u'-msgstr "Hello World"')
+        self.assertEquals(diff[7].strip(), u'+msgstr "Hello World edited"')
 
     def test_msgid_changed(self):
         """ Test that changest to an entry's msgstr are reflected
