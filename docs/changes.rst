@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.2 (unreleased)
+0.2 (2013-04-23)
 ----------------
 
 - Also compare (and show) comments in podiff. [jcbrand] 
