@@ -10,7 +10,7 @@ This package contains command line tools to help manage translations.
 * *pocheck*: Checks the pot/po file for smells. 
     * The `Translate Toolkit`_ provides a similar tool called `pofilter`_. Pocheck aims to not duplicate any of the functionality already in *pofilter*.
     
-* *pounique*: Takes several po files and return one pofiles with unique values. It can pick the values either from the last file given, or my making a "best guess".
+* *pounique*: Takes several po files (or directories of po files) and return one pofile (or a directory of pofiles) with unique values. It can pick the values either from the last file given, or my making a "best guess".
 
 
 Installation
