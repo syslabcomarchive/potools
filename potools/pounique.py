@@ -82,7 +82,7 @@ class PoUnique(object):
         
     def _get_all_comparisons(self):
         if not self.isdir:
-            yield self.args
+            yield '', self.args
         
         for path in self._get_all_unique_paths():
             comparisons = []
