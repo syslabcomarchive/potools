@@ -11,9 +11,12 @@ log = logging.getLogger(__name__)
 def parse_options(args=None, values=None):
     usage = "%prog [options] FILE1 FILE2 ..."
     parser = OptionParser(usage)
-    parser.add_option("-v", "--verbose",
-                      action="store_true", dest="verbose", default=False,
-                      help="Verbose mode")
+    parser.add_option("-s", "--sort",
+                      action="store_true", dest="sort", default=False,
+                      help="Sort output on msgid")
+    parser.add_option("-b", "--best-match",
+                      action="store_true", dest="best", default=False,
+                      help='Choose the "best" msgstr instead of the last.')
 
     (options, args) = parser.parse_args(args, values)
     if len(args) < 2:
@@ -51,9 +54,16 @@ class PoUnique(object):
             for entry in po:
                 all_entries[entry.msgid].append(entry)
             
-        entries = {}    
-        for k, v in all_entries.items():
-            yield sorted(v, key=msgstr_sortkey)[-1]
+        entries = {}
+        entry_list = all_entries.keys()
+        if self.options.sort:
+            entry_list = sorted(entry_list)
+        for k in entry_list:
+            v = all_entries[k]
+            if self.options.best:
+                yield sorted(v, key=msgstr_sortkey)[-1]
+            else:
+                yield v[-1]
             
     def _generate_pofile(self, entries):
         outpo = polib.POFile()
@@ -71,7 +81,7 @@ def main():
     """ """
     options, args = parse_options()
     logging.basicConfig(
-        level=options.verbose and logging.DEBUG or logging.INFO,
+        level=logging.INFO,
         format="%(levelname)s: %(message)s")
     pogetnew = PoUnique(args, options)
     pogetnew.run()
