@@ -57,7 +57,7 @@ class PoUnique(object):
         entries = {}
         entry_list = all_entries.keys()
         if self.options.sort:
-            entry_list = sorted(entry_list)
+            entry_list = sorted(entry_list, key = lambda x: x.lower())
         for k in entry_list:
             v = all_entries[k]
             if self.options.best:

@@ -27,3 +27,7 @@ msgstr ""
 #. Default: Bar
 msgid "Baz"
 msgstr "Bazzza!"
+
+#. Default: Bazoo
+msgid "bazoo"
+msgstr "Bazoo"

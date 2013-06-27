@@ -19,7 +19,6 @@ class TestPoUnique(unittest.TestCase):
         unique = pounique.PoUnique(args=args, options=options)
         
         entries = list(unique._get_unique())
-        self.assertEquals(len(entries), 4)
         
         mapping = {}
         for entry in entries:
@@ -29,7 +28,8 @@ class TestPoUnique(unittest.TestCase):
                           {u'Baz': u'Bazzza!', 
                            u'label_bar': u'', 
                            u'label_foo': u'Foobar', 
-                           u'Hello World': u'Hello World'})
+                           u'Hello World': u'Hello World',
+                           u'bazoo': u'Bazoo'})
 
     def test_unique_best(self):
         options = optparse.Values({'best': True, 'sort': False})
@@ -37,7 +37,6 @@ class TestPoUnique(unittest.TestCase):
         unique = pounique.PoUnique(args=args, options=options)
         
         entries = list(unique._get_unique())
-        self.assertEquals(len(entries), 4)
         
         mapping = {}
         for entry in entries:
@@ -47,4 +46,15 @@ class TestPoUnique(unittest.TestCase):
                           {u'Baz': u'Bazzza!', 
                            u'label_bar': u'Bar', 
                            u'label_foo': u'Foo', 
-                           u'Hello World': u'Hello World'})
+                           u'Hello World': u'Hello World',
+                           u'bazoo': u'Bazoo'})
+
+    def test_unique_sorted(self):
+        options = optparse.Values({'best': False, 'sort': True})
+        options, args = pounique.parse_options([self.pf1, self.pf2], options)
+        unique = pounique.PoUnique(args=args, options=options)
+        
+        entries = list(unique._get_unique())
+        self.assertEquals(
+            [x.msgid for x in entries], 
+            [u'Baz', u'bazoo', u'Hello World', u'label_bar', u'label_foo'])
