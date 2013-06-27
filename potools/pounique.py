@@ -4,6 +4,7 @@ from collections import defaultdict
 import logging
 import polib
 import sys
+import os
 
 log = logging.getLogger(__name__)
 
@@ -17,6 +18,9 @@ def parse_options(args=None, values=None):
     parser.add_option("-b", "--best-match",
                       action="store_true", dest="best", default=False,
                       help='Choose the "best" msgstr instead of the last.')
+    parser.add_option("-o", "--output",
+                      dest="output", default=None,
+                      help='Output file or directory. Defaults to standardout.')
 
     (options, args) = parser.parse_args(args, values)
     if len(args) < 2:
@@ -39,17 +43,45 @@ class PoUnique(object):
     def __init__(self, args=(), options={}):
         self.options = options
         self.args = args
+        if options.output is None:
+            self.isdir = False
+        else:
+            self.isdir = os.path.isdir(options.output)
+        
+        argtypes = [os.path.isdir(path) for path in args]
+        if any(argtypes) and not all(argtypes):
+            raise ValueError('Arguments must all be files or all be directories.')
+
+        if any(argtypes) and not self.isdir:
+            raise ValueError('When inputs are directories, the output must also be a directory.')
+                    
 
     def run(self):
         """ """
-        unique_entries = self._get_unique()
-        outpo = self._generate_pofile(unique_entries)
-        print outpo
+        if not self.options.output:
+            print outpo
+        else:
+            outpo.save(self.options.output)
+                
         sys.exit(0)
+        
+    def _get_all_comparisons(self):
+        if not self.isdir:
+            return self.args
+        
+        for path in self._get_all_unique_paths():
+            pass
+        
+    def _get_all_unique_paths(self):
+        pass
+        
+    def _make_unique_po(self, filepaths):
+        unique_entries = self._get_unique(filepaths)
+        return self._generate_pofile(unique_entries)
 
-    def _get_unique(self):
+    def _get_unique(self, filepaths):
         all_entries = defaultdict(list)
-        for path in self.args:
+        for path in filepaths:
             po = polib.pofile(path)
             for entry in po:
                 all_entries[entry.msgid].append(entry)

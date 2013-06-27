@@ -6,19 +6,21 @@ import unittest
 import shutil
 import optparse
 
-class TestPoUnique(unittest.TestCase):
+class TestPoUniqueFiles(unittest.TestCase):
     """ """
 
-    def setUp(self):
-        self.pf1 = os.getcwd()+'/../../potools/tests/locales/test.po'
-        self.pf2 = os.getcwd()+'/../../potools/tests/locales/test2.po'
+    def _get_optargs(self, **kw):
+        args = [os.getcwd()+'/../../potools/tests/locales/test.po',
+                os.getcwd()+'/../../potools/tests/locales2/test.po']
+        opts = {'best': False, 'sort': False, 'output': None}
+        opts.update(kw)
+        return pounique.parse_options(args, optparse.Values(opts))
 
     def test_unique_last(self):
-        options = optparse.Values({'best': False, 'sort': False})
-        options, args = pounique.parse_options([self.pf1, self.pf2], options)
+        options, args = self._get_optargs()
         unique = pounique.PoUnique(args=args, options=options)
         
-        entries = list(unique._get_unique())
+        entries = list(unique._get_unique(args))
         
         mapping = {}
         for entry in entries:
@@ -32,11 +34,10 @@ class TestPoUnique(unittest.TestCase):
                            u'bazoo': u'Bazoo'})
 
     def test_unique_best(self):
-        options = optparse.Values({'best': True, 'sort': False})
-        options, args = pounique.parse_options([self.pf1, self.pf2], options)
+        options, args = self._get_optargs(best=True)
         unique = pounique.PoUnique(args=args, options=options)
         
-        entries = list(unique._get_unique())
+        entries = list(unique._get_unique(args))
         
         mapping = {}
         for entry in entries:
@@ -50,11 +51,29 @@ class TestPoUnique(unittest.TestCase):
                            u'bazoo': u'Bazoo'})
 
     def test_unique_sorted(self):
-        options = optparse.Values({'best': False, 'sort': True})
-        options, args = pounique.parse_options([self.pf1, self.pf2], options)
+        options, args = self._get_optargs(sort=True)
         unique = pounique.PoUnique(args=args, options=options)
         
-        entries = list(unique._get_unique())
+        entries = list(unique._get_unique(args))
+        
         self.assertEquals(
             [x.msgid for x in entries], 
             [u'Baz', u'bazoo', u'Hello World', u'label_bar', u'label_foo'])
+
+class TestPoUniqueFolders(unittest.TestCase):
+    """ """
+
+    def _get_optargs(self, **kw):
+        args = [os.getcwd()+'/../../potools/tests/locales/',
+                os.getcwd()+'/../../potools/tests/locales2/']
+        
+        opts = {'best': False, 'sort': False, 'output': None}
+        opts.update(kw)
+        return pounique.parse_options(args, optparse.Values(opts))
+
+    def test_dir(self):
+        try:
+            outdir = tempfile.mkdtemp()
+            opts, args = self._get_optargs(output=outdir)
+        finally:
+            shutil.rmtree(outdir)
