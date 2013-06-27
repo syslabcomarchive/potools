@@ -64,8 +64,8 @@ class TestPoUniqueFolders(unittest.TestCase):
     """ """
 
     def _get_optargs(self, **kw):
-        args = [os.getcwd()+'/../../potools/tests/locales/',
-                os.getcwd()+'/../../potools/tests/locales2/']
+        args = [os.path.normpath(os.getcwd()+'/../../potools/tests/locales/'),
+                os.path.normpath(os.getcwd()+'/../../potools/tests/locales2/')]
         
         opts = {'best': False, 'sort': False, 'output': None}
         opts.update(kw)
@@ -74,6 +74,15 @@ class TestPoUniqueFolders(unittest.TestCase):
     def test_dir(self):
         try:
             outdir = tempfile.mkdtemp()
-            opts, args = self._get_optargs(output=outdir)
+            options, args = self._get_optargs(output=outdir)
+            
+            unique = pounique.PoUnique(args=args, options=options)
+            
+            self.assertEquals(unique._get_all_unique_paths(),
+                              set(['test.po']))
+
+            self.assertEquals(list(unique._get_all_comparisons()),
+                              [('test.po', [args[0] + '/test.po', args[1] + '/test.po'])])
+            
         finally:
             shutil.rmtree(outdir)
