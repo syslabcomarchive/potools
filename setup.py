@@ -32,5 +32,6 @@ setup(name='potools',
       podiff = potools.podiff:main
       pogetnew = potools.poget:main
       pocheck = potools.pocheck:main
+      pounique = potools.pounique:main
       """,
       )
