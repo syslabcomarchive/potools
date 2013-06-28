@@ -24,7 +24,7 @@ def parse_options(args=None, values=None):
 
     (options, args) = parser.parse_args(args, values)
     if len(args) < 2:
-        parser.error(u"You have to name two or more po files")
+        parser.error(u"You have to name two or more po files or directories")
     return (options, args)
 
 def msgstr_sortkey(msg):

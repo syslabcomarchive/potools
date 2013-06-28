@@ -39,3 +39,12 @@ def append_entry(pofile, entry, default_msgstr=None):
         )
     pofile.append(entry)
     return pofile
+
+
+def msg_is_updated(msg):
+    """Returns False is the message is empty or fuzzy"""
+    if not msg.msgstr:
+        return False
+    if u'fuzzy' in msg.flags:
+        return False
+    return True

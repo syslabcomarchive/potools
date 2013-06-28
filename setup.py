@@ -33,5 +33,6 @@ setup(name='potools',
       pogetnew = potools.poget:main
       pocheck = potools.pocheck:main
       pounique = potools.pounique:main
+      poupdate = potools.poupdate:main
       """,
       )

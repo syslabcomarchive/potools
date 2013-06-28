@@ -1,44 +1,111 @@
+from optparse import OptionParser
+from potools import utils
+from collections import defaultdict
+import logging
+import polib
 import sys
 import os
-import polib
-from ptools import utils
+
+log = logging.getLogger(__name__)
 
 
-def poupdate():
-    """%(program)s: For an existing po file ORIG and a second po file UPDATE that
-        contains new translations for a subset of ORIG, the new translations are
-        merged to ORIG.
-        Msgids present in UPDATE that are not present in ORIG will be a ignored
-        (warning) given
+def parse_options(args=None, values=None):
+    usage = "%prog [options] TARGET SOURCE"
+    parser = OptionParser(usage)
+    parser.add_option("-n", "--insert-new",
+                      action="store_true", dest="insert_new", default=False,
+                      help="Insert msgid's from the SOURCE that do not exist in TARGET")
+    parser.add_option("-f", "--force",
+                      action="store_true", dest="force", default=False,
+                      help="Always overwrite the TARGET msgstr even if the SOURCE msgstr is empty of fuzzy")
 
-        usage:    %(program)s orig.po update.po
-        orig.po   A po file that should be updated with new translations
-        update.po The po file that contains new translations to go into orig.po
+    (options, args) = parser.parse_args(args, values)
+    if len(args) < 2:
+        parser.error(u"You have to name two po-files or directories of po-files")
+    return (options, args)
+
+    
+class PoUpdate(object):
+    """ Compare two or more po files and generate a po merged po file with no duplicate entries. 
+    
+        With conflicting entries non-fuzzy will take precedence over fuzzy,
+        and then the longest message win.
+
+        Output is printed to stdout, in the format as a valid po file, so that
+        it can be sent to translator.
     """
-    if len(sys.argv) < 3:
-        utils.usage(sys.stderr, poupdate, "\nERROR: Not enough arguments")
-    origfile = sys.argv[1]
-    updatefile = sys.argv[2]
 
-    if not os.path.isfile(origfile):
-        utils.usage(sys.stderr, poupdate, "\nERROR: path to ORIG file is not valid")
+    def __init__(self, args=(), options={}):
+        self.options = options
+        self.args = [os.path.normpath(path) for path in args]
 
-    if not os.path.isfile(updatefile):
-        utils.usage(sys.stderr, poupdate, "\nERROR: path to UPDATE file is not valid")
+        # Check if arguments are files or directories.
+        argtypes = [os.path.isdir(path) for path in args]
+        if any(argtypes) and not all(argtypes):
+            raise ValueError('Arguments must both be files or both be directories.')
+        
+        self.isdir = any(argtypes)
 
-    orig = polib.pofile(origfile)
-    update = polib.pofile(updatefile)
+    def run(self):
+        """ """
+        # Target is the po file that should be updated.
+        # Source is the one with new translations.
+        target, source = self.args
+        if not self.isdir:
+            self._update_po(target, source)
+        else:
+            prefix_len = len(source) + 1
+            for dirpath, dirnames, filenames in os.walk(source):
+                for filename in filenames:
+                    if os.path.splitext(filename)[1] == '.po':
+                        source_path = os.path.join(dirpath, filename)
+                        relative_path = source_path[prefix_len:]
+                        target_path = os.path.join(target, relative_path)
+                        if os.path.exists(target_path):
+                            self._update_po(target_path, source_path)
+                                
+        
+    def _update_po(self, target_path, source_path):
+        log.info("Updating %s from %s" % (target_path, source_path))
+        target = polib.pofile(target_path, wrapwidth=79)
+        source = polib.pofile(source_path)
+        
+        target_dict = {}
+        for entry in target:
+            target_dict[entry.msgid] = entry
+        
+        count = 0
+        for entry in source:
+            if not entry.msgid in target_dict:
+                if self.options.insert_new:
+                    # If it's not in the target and -n is true, add it:
+                    target.append(entry)
+                continue
+            target_entry = target_dict[entry.msgid]
+            if target_entry.msgstr != entry.msgstr:
+                # The messages are different. Check if we should update.
+                if not self.options.force:
+                    # if force is set, skip the checks and always update.
+                    if not entry.msgstr:
+                        # The new message is empty, we should not update
+                        continue
+                    if not utils.msg_is_updated(entry) and utils.msg_is_updated(target_entry):
+                        # The new message is fuzzy and the old message is not fuzzy.
+                        continue
+                # Update the target
+                target_dict[entry.msgid].msgstr = entry.msgstr
+                count += 1
+        
+        # XXX Set the update time.
+        target.save(target_path)
+        log.info("%s entries updated" % count)
+        
 
-    for entry in update:
-        msgid = entry.msgid
-        if msgid.strip() == '':
-            continue
-        target = orig.find(msgid)
-        if not target:
-            print "WARNING! msgid '%s' not present in %s." % (msgid, origfile)
-            continue
-        target.msgstr = entry.msgstr
-
-    orig.save()
-    sys.exit('Ok')
-
+def main():
+    """ """
+    options, args = parse_options()
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s: %(message)s")
+    pogetnew = PoUpdate(args, options)
+    pogetnew.run()

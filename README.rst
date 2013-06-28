@@ -12,6 +12,8 @@ This package contains command line tools to help manage translations.
     
 * *pounique*: Takes several po files (or directories of po files) and return one pofile (or a directory of pofiles) with unique values. It can pick the values either from the last file given, or my making a "best guess".
 
+* *poupdate*: Will update the first po file with values from the second.
+
 
 Installation
 ============
