@@ -111,16 +111,20 @@ class PoUnique(object):
 
     def _get_unique(self, filepaths):
         all_entries = defaultdict(list)
+        entry_order = []
         for path in filepaths:
             po = polib.pofile(path)
             for entry in po:
+                if entry.msgid not in all_entries:
+                    entry_order.append(entry.msgid)
                 all_entries[entry.msgid].append(entry)
             
         entries = {}
-        entry_list = all_entries.keys()
         if self.options.sort:
             entry_list = sorted(entry_list, key = lambda x: x.lower())
-        for k in entry_list:
+        for k in entry_order:
+            if k == 'label_company_country' and '/de/' in filepaths[0]:
+                import pdb;pdb.set_trace()
             v = all_entries[k]
             if self.options.best:
                 yield sorted(v, key=msgstr_sortkey)[-1]
@@ -135,7 +139,7 @@ class PoUnique(object):
         for (key, val) in headerpo.metadata.items():
             outpo.metadata.update({key: val})
         for e in entries:
-            outpo = utils.append_entry(outpo, e)
+            outpo.append(e)
         return outpo
 
 
