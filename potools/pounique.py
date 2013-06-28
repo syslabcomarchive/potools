@@ -121,10 +121,8 @@ class PoUnique(object):
             
         entries = {}
         if self.options.sort:
-            entry_list = sorted(entry_list, key = lambda x: x.lower())
+            entry_order = sorted(entry_order, key = lambda x: x.lower())
         for k in entry_order:
-            if k == 'label_company_country' and '/de/' in filepaths[0]:
-                import pdb;pdb.set_trace()
             v = all_entries[k]
             if self.options.best:
                 yield sorted(v, key=msgstr_sortkey)[-1]
