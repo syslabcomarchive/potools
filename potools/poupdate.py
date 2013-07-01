@@ -5,9 +5,18 @@ import logging
 import polib
 import sys
 import os
+import time
+import datetime
 
 log = logging.getLogger(__name__)
 
+def po_timestamp():
+    tzminutes = [time.timezone, time.altzone][time.daylight] // 60
+    # Apparently PO files use POSIX standard times, where timezones
+    # are backwards, hence the minus:
+    tzstr = '%+03d%02d' % divmod(-tzminutes, 60)
+    now = datetime.datetime.now()
+    return now.strftime('%Y-%m-%d %H:%M') + tzstr
 
 def parse_options(args=None, values=None):
     usage = "%prog [options] TARGET SOURCE"
@@ -67,7 +76,7 @@ class PoUpdate(object):
         
     def _update_po(self, target_path, source_path):
         log.info("Updating %s from %s" % (target_path, source_path))
-        target = polib.pofile(target_path, wrapwidth=79)
+        target = polib.pofile(target_path)
         source = polib.pofile(source_path)
         
         target_dict = {}
@@ -95,8 +104,21 @@ class PoUpdate(object):
                 # Update the target
                 target_dict[entry.msgid].msgstr = entry.msgstr
                 count += 1
-        
-        # XXX Set the update time.
+
+        if not count:
+            log.info("No entries updated")
+            return
+            
+        # Update the revision date.
+        source_date = source.metadata.get('PO-Revision-Date', '')
+        target_date = target.metadata.get('PO-Revision-Date', '')
+        if source_date > target_date:
+            # In this case we use the source date as the last update
+            target.metadata['PO-Revision-Date'] = source_date
+        else:
+            # The target has been modified after the source. 
+            # We set the revision date to now, to mark it as changed.
+            target.metadata['PO-Revision-Date'] = po_timestamp()
         target.save(target_path)
         log.info("%s entries updated" % count)
         
