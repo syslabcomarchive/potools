@@ -34,7 +34,7 @@ class PoPopulate(object):
         self.updated = 0
         
         if self.options.update:
-            args = [self.args[0], self.args[0]]
+            args = [args[0], args[0]]
             
         self.args = [os.path.normpath(path) for path in args]
         
@@ -82,7 +82,7 @@ class PoPopulate(object):
                 # Empty message string, try to find an update
                 default = get_default(entry)
                 if default:
-                    self.updated += 0
+                    self.updated += 1
                     modified = True
                     entry.msgstr = default
                     if not 'fuzzy' in entry.flags:
