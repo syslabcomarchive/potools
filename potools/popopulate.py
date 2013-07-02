@@ -1,3 +1,4 @@
+import os
 import logging
 import polib
 from optparse import OptionParser
@@ -29,12 +30,43 @@ class PoPopulate(object):
     """
     def __init__(self, options, args):
         self.options = options
-        self.args = args
         self.untranslated = 0
         self.updated = 0
+        
+        if self.options.update:
+            args = [self.args[0], self.args[0]]
+            
+        self.args = [os.path.normpath(path) for path in args]
+        
+        if os.path.isdir(args[0]):
+            self.isdir = True
+            if not os.path.exists(args[1]):
+                log.info('Output directory does not exist, and will be created')
+            else:
+                if not os.path.isdir(args[1]):
+                    raise ValueError('Arguments must all be files or all be directories.')
+        else:
+            self.isdir = False
+            if os.path.isdir(args[1]):
+                raise ValueError('Arguments must all be files or all be directories.')
+
 
     def run(self):
-        self._populate(self.args[0], self.args[1])
+        source, target = self.args
+        if not self.isdir:
+            self._populate(source, target)
+        else:
+            prefix_len = len(source) + 1
+            for dirpath, dirnames, filenames in os.walk(source):
+                for filename in filenames:
+                    if os.path.splitext(filename)[1] == '.po':
+                        source_path = os.path.join(dirpath, filename)
+                        relative_path = source_path[prefix_len:]
+                        target_path = os.path.join(target, relative_path)
+                        target_dir = os.path.split(target_path)[0]
+                        if not os.path.exists(target_dir):
+                            os.makedirs(target_dir)
+                        self._populate(source_path, target_path)
             
         log.debug("--------------------------------------------------------")
         log.debug("SOME STATS TO HELP WITH DOUBLE-CHECKING:")
@@ -44,6 +76,7 @@ class PoPopulate(object):
         log.debug("--------------------------------------------------------")
             
     def _populate(self, infile, outfile):
+        print "!", infile, outfile
         pofile = polib.pofile(infile)
 
         modified = False
