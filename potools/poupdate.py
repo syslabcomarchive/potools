@@ -24,7 +24,10 @@ def parse_options(args=None, values=None):
                       help="Insert msgid's from the SOURCE that do not exist in TARGET")
     parser.add_option("-f", "--force",
                       action="store_true", dest="force", default=False,
-                      help="Always overwrite the TARGET msgstr even if the SOURCE msgstr is empty of fuzzy")
+                      help="Always overwrite the TARGET msgstr even if the SOURCE msgstr is empty or fuzzy")
+    parser.add_option("-u", "--use-fuzzy",
+                      action="store_true", dest="use_fuzzy", default=False,
+                      help="Insert msgid's from the SOURCE even though they are fuzzy, if TARGET is empty")
 
     (options, args) = parser.parse_args(args, values)
     if len(args) < 2:
@@ -96,9 +99,14 @@ class PoUpdate(object):
                     if not entry.msgstr:
                         # The new message is empty, we should not update
                         continue
-                    if not utils.msg_is_updated(entry) and utils.msg_is_updated(target_entry):
-                        # The new message is fuzzy and the old message is not fuzzy.
-                        continue
+                    if not utils.msg_is_updated(entry):
+                        # The new message is fuzzy
+                        if utils.msg_is_updated(target_entry):
+                            # the old message is not fuzzy and not empty
+                            continue
+                        elif not self.options.use_fuzzy:
+                            # Never use fuzzy unless use_fuzzy is set:
+                            continue
                 # Update the target
                 target_dict[entry.msgid].msgstr = entry.msgstr
                 count += 1

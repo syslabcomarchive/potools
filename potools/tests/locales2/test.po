@@ -24,10 +24,14 @@ msgstr "Foobar"
 msgid "label_bar"
 msgstr ""
 
-#. Default: Bar
+#. Default: Baz
 msgid "Baz"
 msgstr "Bazzza!"
 
 #. Default: Bazoo
 msgid "bazoo"
 msgstr "Bazoo"
+
+#. Default: Keep it empty
+msgid "Keep it empty"
+msgstr ""

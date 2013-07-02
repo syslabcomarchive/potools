@@ -30,7 +30,9 @@ class TestPoUniqueFiles(unittest.TestCase):
                            u'label_bar': u'', 
                            u'label_foo': u'Foobar', 
                            u'Hello World': u'Hello World',
-                           u'bazoo': u'Bazoo'})
+                           u'bazoo': u'Bazoo',
+                           u'Keep it empty': u'',
+                           })
 
     def test_unique_best(self):
         options, args = self._get_optargs(best=True)
@@ -47,7 +49,9 @@ class TestPoUniqueFiles(unittest.TestCase):
                            u'label_bar': u'Bar', 
                            u'label_foo': u'Foo', 
                            u'Hello World': u'Hello World',
-                           u'bazoo': u'Bazoo'})
+                           u'bazoo': u'Bazoo',
+                           u'Keep it empty': u'',
+                           })
 
     def test_unique_sorted(self):
         options, args = self._get_optargs(sort=True)
@@ -57,7 +61,7 @@ class TestPoUniqueFiles(unittest.TestCase):
         
         self.assertEquals(
             [x.msgid for x in entries], 
-            [u'Baz', u'bazoo', u'Hello World', u'label_bar', u'label_foo'])
+            [u'Baz', u'bazoo', u'Hello World', u'Keep it empty', u'label_bar', u'label_foo'])
 
 
 class TestPoUniqueFolders(unittest.TestCase):
