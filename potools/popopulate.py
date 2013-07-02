@@ -68,15 +68,11 @@ class PoPopulate(object):
                             os.makedirs(target_dir)
                         self._populate(source_path, target_path)
             
-        log.debug("--------------------------------------------------------")
-        log.debug("SOME STATS TO HELP WITH DOUBLE-CHECKING:")
-        log.debug("Untranslated entries found: %d" % self.untranslated)
-        log.debug("Entries updated with default: %d" % self.updated)
-        log.debug("Untranslated entries with no default: %d" % (self.untranslated-self.updated))
-        log.debug("--------------------------------------------------------")
+        log.info("Untranslated entries found: %d" % self.untranslated)
+        log.info("Entries updated with default: %d" % self.updated)
+        log.info("Untranslated entries with no default: %d" % (self.untranslated-self.updated))
             
     def _populate(self, infile, outfile):
-        print "!", infile, outfile
         pofile = polib.pofile(infile)
 
         modified = False
