@@ -32,6 +32,7 @@ class PoPopulate(object):
         self.options = options
         self.untranslated = 0
         self.updated = 0
+        self.missing = 0
         
         if self.options.update:
             args = [args[0], args[0]]
@@ -70,7 +71,7 @@ class PoPopulate(object):
             
         log.info("Untranslated entries found: %d" % self.untranslated)
         log.info("Entries updated with default: %d" % self.updated)
-        log.info("Untranslated entries with no default: %d" % (self.untranslated-self.updated))
+        log.info("Untranslated entries with no default: %d" % (self.missing))
             
     def _populate(self, infile, outfile):
         pofile = polib.pofile(infile)
@@ -81,7 +82,9 @@ class PoPopulate(object):
                 self.untranslated += 1
                 # Empty message string, try to find an update
                 default = get_default(entry)
-                if default:
+                if not default:
+                    self.missing += 1
+                else:
                     self.updated += 1
                     modified = True
                     entry.msgstr = default
