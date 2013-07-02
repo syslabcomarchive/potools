@@ -14,6 +14,8 @@ This package contains command line tools to help manage translations.
 
 * *poupdate*: Will update the first po file with values from the second.
 
+* *popopulate*: Will replace any empty messages with their Default message, if there is one, and mark it as fuzzy.
+
 
 Installation
 ============
