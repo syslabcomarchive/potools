@@ -1,9 +1,7 @@
 from optparse import OptionParser
 from potools import utils
-from collections import defaultdict
 import logging
 import polib
-import sys
 import os
 import time
 import datetime

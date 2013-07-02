@@ -1,9 +1,7 @@
 import logging
-import sys
 import polib
 from optparse import OptionParser
 from potools.utils import get_default
-from potools.utils import append_entry
 
 log = logging.getLogger(__name__)
 

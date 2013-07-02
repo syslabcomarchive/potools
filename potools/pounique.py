@@ -1,5 +1,4 @@
 from optparse import OptionParser
-from potools import utils
 from collections import defaultdict
 import logging
 import polib
@@ -119,7 +118,6 @@ class PoUnique(object):
                     entry_order.append(entry.msgid)
                 all_entries[entry.msgid].append(entry)
             
-        entries = {}
         if self.options.sort:
             entry_order = sorted(entry_order, key = lambda x: x.lower())
         for k in entry_order:

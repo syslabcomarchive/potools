@@ -1,6 +1,5 @@
 from potools import pounique
 import os
-import polib
 import tempfile
 import unittest
 import shutil
