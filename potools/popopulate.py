@@ -7,46 +7,64 @@ from potools.utils import append_entry
 
 log = logging.getLogger(__name__)
 
-def parse_options(self):
-    usage = "%prog [options] FILE"
+def parse_options(args=None, values=None):
+    usage = "%prog [options] SOURCE TARGET"
     parser = OptionParser(usage)
     parser.add_option("-v", "--verbose",
                         action="store_true", dest="verbose", default=False,
                         help="Verbose mode")
-    (options, args) = parser.parse_args()
+    parser.add_option("-u", "--update",
+                        action="store_true", dest="update", default=False,
+                        help="Update original file instead of creating a new file.")
+    (options, args) = parser.parse_args(args, values)
+    if options.update and len(args) != 1:
+        parser.error(u"When using the -u/--update parameter, you can give only one argument.")
+    if not options.update and len(args) != 2:
+        parser.error(u"You need a source and target parameter that can either be files or directories.")
     return (options, args)
 
 
-def PoPopulate():
+class PoPopulate(object):
     """ For every untranslated or fuzzy entry, copy its "Default" 
         string for its msgstr value. If no default value exists, copy its 
         msgid.
     """
-    def __init__(self, options={}, args=()):
+    def __init__(self, options, args):
         self.options = options
         self.args = args
+        self.untranslated = 0
+        self.updated = 0
 
     def run(self):
-        pofile = polib.pofile(self.args[1])
-        outpo = polib.POFile()
-
-        # Copy header and metadata
-        outpo.header = pofile.header
-        [outpo.metadata.update({key: val}) for (key, val) in pofile.metadata.items()]
-
-        entries = pofile.untranslated_entries() + pofile.fuzzy_entries()
-        for entry in entries:
-            default = get_default(entry)
-            outpo = append_entry(outpo, entry, default)
-
-        print outpo
+        self._populate(self.args[0], self.args[1])
+            
         log.debug("--------------------------------------------------------")
         log.debug("SOME STATS TO HELP WITH DOUBLE-CHECKING:")
-        log.debug("Untranslated entries in old.po: %d" % len(pofile.untranslated_entries()))
-        log.debug("Fuzzy entries in old.po: %d" % len(pofile.fuzzy_entries()))
-        log.debug("Found %d entries that need to be updated" % len(outpo))
+        log.debug("Untranslated entries found: %d" % self.untranslated)
+        log.debug("Entries updated with default: %d" % self.updated)
+        log.debug("Untranslated entries with no default: %d" % (self.untranslated-self.updated))
         log.debug("--------------------------------------------------------")
-        sys.exit(0)
+            
+    def _populate(self, infile, outfile):
+        pofile = polib.pofile(infile)
+
+        modified = False
+        for entry in pofile:
+            if not entry.msgstr:
+                self.untranslated += 1
+                # Empty message string, try to find an update
+                default = get_default(entry)
+                if default:
+                    self.updated += 0
+                    modified = True
+                    entry.msgstr = default
+                    if not 'fuzzy' in entry.flags:
+                        entry.flags.append('fuzzy')
+         
+        if self.options.update and not modified:
+            # Don't save if this is an inplace update and there was no modifications.
+            return
+        pofile.save(outfile)
 
 
 def main():

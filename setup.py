@@ -34,5 +34,6 @@ setup(name='potools',
       pocheck = potools.pocheck:main
       pounique = potools.pounique:main
       poupdate = potools.poupdate:main
+      popopulate = potools.popopulate:main
       """,
       )

@@ -60,6 +60,7 @@ class TestPoUniqueFiles(unittest.TestCase):
             [x.msgid for x in entries], 
             [u'Baz', u'bazoo', u'Hello World', u'label_bar', u'label_foo'])
 
+
 class TestPoUniqueFolders(unittest.TestCase):
     """ """
 
