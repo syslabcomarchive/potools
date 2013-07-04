@@ -15,6 +15,10 @@ def parse_options(args=None, values=None):
     parser.add_option("-u", "--update",
                         action="store_true", dest="update", default=False,
                         help="Update original file instead of creating a new file.")
+    parser.add_option("-f", "--fuzzy",
+                        action="store_true", dest="fuzzy", default=False,
+                        help="Force override for all fuzzy entries, even if "
+                        "they already contain a translation.")
     (options, args) = parser.parse_args(args, values)
     if options.update and len(args) != 1:
         parser.error(u"When using the -u/--update parameter, you can give only one argument.")
@@ -78,6 +82,8 @@ class PoPopulate(object):
 
         modified = False
         for entry in pofile:
+            if self.options.fuzzy and 'fuzzy' in entry.flags:
+                entry.msgstr = ""
             if not entry.msgstr:
                 self.untranslated += 1
                 # Empty message string, try to find an update
