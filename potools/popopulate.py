@@ -24,8 +24,8 @@ def parse_options(args=None, values=None):
 
 
 class PoPopulate(object):
-    """ For every untranslated or fuzzy entry, copy its "Default" 
-        string for its msgstr value. If no default value exists, copy its 
+    """ For every untranslated or fuzzy entry, copy its "Default"
+        string for its msgstr value. If no default value exists, copy its
         msgid.
     """
     def __init__(self, options, args):
@@ -33,12 +33,12 @@ class PoPopulate(object):
         self.untranslated = 0
         self.updated = 0
         self.missing = 0
-        
+
         if self.options.update:
             args = [args[0], args[0]]
-            
+
         self.args = [os.path.normpath(path) for path in args]
-        
+
         if os.path.isdir(args[0]):
             self.isdir = True
             if not os.path.exists(args[1]):
@@ -68,11 +68,11 @@ class PoPopulate(object):
                         if not os.path.exists(target_dir):
                             os.makedirs(target_dir)
                         self._populate(source_path, target_path)
-            
+
         log.info("Untranslated entries found: %d" % self.untranslated)
         log.info("Entries updated with default: %d" % self.updated)
         log.info("Untranslated entries with no default: %d" % (self.missing))
-            
+
     def _populate(self, infile, outfile):
         pofile = polib.pofile(infile)
 
@@ -90,7 +90,7 @@ class PoPopulate(object):
                     entry.msgstr = default
                     if not 'fuzzy' in entry.flags:
                         entry.flags.append('fuzzy')
-         
+
         if self.options.update and not modified:
             # Don't save if this is an inplace update and there was no modifications.
             return
