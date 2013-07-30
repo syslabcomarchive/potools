@@ -4,8 +4,8 @@ Changelog
 0.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
-
+- poupdate: added new option to determine if fuzzy markers in the
+  target should be removed on update [pysailor] 
 
 0.3 (2013-07-30)
 ----------------

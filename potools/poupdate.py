@@ -28,6 +28,11 @@ def parse_options(args=None, values=None):
     parser.add_option("-u", "--use-fuzzy",
                       action="store_true", dest="use_fuzzy", default=False,
                       help="Insert msgid's from the SOURCE even though they are fuzzy, if TARGET is empty")
+    parser.add_option(
+        "-r", "--reset-fuzzy",
+        action="store_true", dest="reset_fuzzy", default=False,
+        help="Remove an existing fuzzy flag on translations in the target "
+        "when they get updated.")
 
     (options, args) = parser.parse_args(args, values)
     if len(args) < 2:
@@ -109,6 +114,11 @@ class PoUpdate(object):
                             continue
                 # Update the target
                 target_dict[entry.msgid].msgstr = entry.msgstr
+                # Since the target has been updated with a new translation,
+                # it is no longer fuzzy
+                if self.options.reset_fuzzy and \
+                        'fuzzy' in target_dict[entry.msgid].flags:
+                    target_dict[entry.msgid].flags.remove('fuzzy')
                 count += 1
 
         if not count:
