@@ -10,7 +10,7 @@ setup(name='potools',
                        open(os.path.join("docs", "changes.rst")).read(),
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='',
-      author='Wolfgang Thomas, Manuel Reinhardt, JC Brand',
+      author='Lennart Regebro, Wolfgang Thomas, Manuel Reinhardt, JC Brand',
       author_email='info@syslab.com',
       url='http://syslab.com',
       license='GPL',
