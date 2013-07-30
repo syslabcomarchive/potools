@@ -34,10 +34,10 @@ def parse_options(args=None, values=None):
         parser.error(u"You have to name two po-files or directories of po-files")
     return (options, args)
 
-    
+
 class PoUpdate(object):
-    """ Compare two or more po files and generate a po merged po file with no duplicate entries. 
-    
+    """ Compare two or more po files and generate a po merged po file with no duplicate entries.
+
         With conflicting entries non-fuzzy will take precedence over fuzzy,
         and then the longest message win.
 
@@ -53,7 +53,7 @@ class PoUpdate(object):
         argtypes = [os.path.isdir(path) for path in args]
         if any(argtypes) and not all(argtypes):
             raise ValueError('Arguments must both be files or both be directories.')
-        
+
         self.isdir = any(argtypes)
 
     def run(self):
@@ -73,17 +73,17 @@ class PoUpdate(object):
                         target_path = os.path.join(target, relative_path)
                         if os.path.exists(target_path):
                             self._update_po(target_path, source_path)
-                                
-        
+
+
     def _update_po(self, target_path, source_path):
         log.info("Updating %s from %s" % (target_path, source_path))
         target = polib.pofile(target_path)
         source = polib.pofile(source_path)
-        
+
         target_dict = {}
         for entry in target:
             target_dict[entry.msgid] = entry
-        
+
         count = 0
         for entry in source:
             if not entry.msgid in target_dict:
@@ -114,7 +114,7 @@ class PoUpdate(object):
         if not count:
             log.info("No entries updated")
             return
-            
+
         # Update the revision date.
         source_date = source.metadata.get('PO-Revision-Date', '')
         target_date = target.metadata.get('PO-Revision-Date', '')
@@ -122,12 +122,12 @@ class PoUpdate(object):
             # In this case we use the source date as the last update
             target.metadata['PO-Revision-Date'] = source_date
         else:
-            # The target has been modified after the source. 
+            # The target has been modified after the source.
             # We set the revision date to now, to mark it as changed.
             target.metadata['PO-Revision-Date'] = po_timestamp()
         target.save(target_path)
         log.info("%s entries updated" % count)
-        
+
 
 def main():
     """ """
