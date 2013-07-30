@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.3 (unreleased)
+0.3 (2013-07-30)
 ----------------
 
 - Added pounique, poupdate and popopulate commands. [regebro]
