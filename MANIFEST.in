@@ -3,3 +3,7 @@ recursive-include docs *.rst
 recursive-include potools *.po
 recursive-include potools *.pot
 
+
+# added by check_manifest.py
+include *.rst
+include buildout.cfg
