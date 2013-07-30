@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.4 (unreleased)
-----------------
+0.3.1 (2013-07-30)
+------------------
 
 - poupdate: added new option to determine if fuzzy markers in the
   target should be removed on update [pysailor] 
