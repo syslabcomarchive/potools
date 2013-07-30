@@ -3,3 +3,10 @@
 *.wpr
 *.wpu
 .installed.cfg
+bin/
+develop-eggs/
+eggs/
+include/
+lib/
+local/
+parts/
