@@ -80,7 +80,7 @@ class Podiff(object):
             if branchmatch:
                 branch = branchmatch.group(1)
             else:
-                branch = 'master'
+                branch = ''
             cmdline = '%s show %s:%s' % (cmd, branch, relpath)
             err, errtmppath = tempfile.mkstemp(text=True)
             out = subprocess.Popen(cmdline.split(' '),
