@@ -4,7 +4,8 @@ Changelog
 0.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixed setup.py configuration to avoid problems with newer setuptools.
+  [do3cc]
 
 
 0.3.1 (2013-07-30)
