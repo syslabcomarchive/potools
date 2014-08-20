@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.3.2 (unreleased)
+0.3.2 (2014-08-20)
 ------------------
 
 - Fixed setup.py configuration to avoid problems with newer setuptools.
